@@ -14,13 +14,14 @@
 #   I2cBus      — WriteByte/ReadByte/WriteReg/ReadReg/WriteBytes/ReadBytes
 #   SpiBus      — Transfer(List<int>) -> List<int>
 #   Clock       — DelayMs/DelayUs/Millis/Micros
+#   SerialPort  — WriteString/ReadString/WriteBytes/ReadBytes
 #
 # Pure Amalgame (interfaces only) — no C, no system dependency.
 # Requires amc >= 0.8.72 (working interface dispatch).
 
 [package]
 name              = "amalgame-hal"
-version           = "0.1.0"
+version           = "0.2.0"
 license           = "Apache-2.0"
 description       = "Portable hardware abstraction layer: backend-neutral interfaces (DigitalOut/In, PwmOut, I2cBus, SpiBus, Clock) so component drivers run on both Linux SBCs (amalgame-hardware-gpio) and future bare-metal MCU backends."
 authors           = ["Bastien Mouget"]
@@ -28,7 +29,7 @@ required-amalgame = ">=0.8.72"
 schema-version    = 1
 
 [stdlib]
-classes   = ["DigitalOut", "DigitalIn", "PwmOut", "I2cBus", "SpiBus", "Clock"]
+classes   = ["DigitalOut", "DigitalIn", "PwmOut", "I2cBus", "SpiBus", "Clock", "SerialPort"]
 header    = "facade-stub.h"
 namespace = "Amalgame.Hal"
 facade    = "facade.am"
