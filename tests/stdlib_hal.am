@@ -1,0 +1,33 @@
+// Smoke test for amalgame-hal: implement an interface and dispatch
+// through it. Exercises amc's cross-package interface dispatch against
+// the released compiler. Output is reachable ONLY via the interface.
+
+namespace Tests
+
+import Amalgame.Hal
+
+public class FakeOut implements DigitalOut {
+    private state: int
+    public FakeOut() { this.state = 0 }
+    public void Write(level: int) { this.state = level }
+    public void High() { this.state = 1 }
+    public void Low()  { this.state = 0 }
+    public void Toggle() { if (this.state == 1) { this.state = 0 } else { this.state = 1 } }
+    public int StateOf() { return this.state }
+}
+
+public class Program {
+    private static void Drive(o: DigitalOut) {
+        o.High()
+        o.Toggle()   // 1 → 0
+    }
+    public static void Main(string[] args) {
+        let led: FakeOut = new FakeOut()
+        Program.Drive(led)
+        if (led.StateOf() == 0) {
+            Console.WriteLine("[PASS] hal interface dispatch")
+        } else {
+            Console.WriteLine("[FAIL] hal interface dispatch")
+        }
+    }
+}

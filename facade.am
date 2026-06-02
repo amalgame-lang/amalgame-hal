@@ -1,0 +1,81 @@
+namespace Amalgame.Hal
+
+// ── Amalgame.Hal — portable hardware abstraction layer ─────
+//
+// Tiny, backend-neutral interfaces that high-level component
+// drivers (LEDs, displays, motors, sensors) program against, so a
+// driver is written ONCE and runs on any backend that implements
+// these:
+//
+//   - amalgame-hardware-gpio  → Linux SBCs (Raspberry Pi, …) today
+//   - a future Amalgame.Mcu backend → bare-metal MCUs later
+//
+// A driver takes the interface, not a concrete class:
+//
+//     // in a display driver package
+//     public class Ssd1306 {
+//         private bus: I2cBus
+//         public Ssd1306(bus: I2cBus, addr: int) { this.bus = bus; … }
+//     }
+//
+//     // on a Raspberry Pi (today)
+//     let i2c = new I2c(1)                 // Amalgame.Hardware, implements I2cBus
+//     let oled = new Ssd1306(i2c, 0x3C)    // same driver, any backend
+//
+// Types are deliberately primitive (int / bool / List<int>) so the
+// contract carries nothing Linux- or MCU-specific. Levels are plain
+// ints: 0 = low, non-zero = high.
+
+// A single digital output line (an LED pin, a driver ENABLE, a SPI
+// chip-select, a stepper coil, …).
+public interface DigitalOut {
+    Write(int level) -> void
+    High() -> void
+    Low() -> void
+    Toggle() -> void
+}
+
+// A single digital input line (a button, an endstop, a sensor data
+// line). Read() returns 0 or 1.
+public interface DigitalIn {
+    Read() -> int
+}
+
+// A PWM-capable output (LED brightness, servo, ESC, motor speed,
+// heater duty). Both a coarse percentage helper and nanosecond-precise
+// period/duty control (needed for servos/ESCs where 1µs matters).
+public interface PwmOut {
+    SetFrequency(int hz, int dutyPercent) -> bool   // convenience (0..100%)
+    SetPeriod(int ns) -> bool                       // period, nanoseconds
+    SetDuty(int ns) -> bool                         // active time, ns (<= period)
+    Enable() -> bool
+    Disable() -> bool
+}
+
+// An I2C master bus. Every call carries the 7-bit slave `addr`, so a
+// single bus drives many devices. Bytes are List<int> (0..255).
+public interface I2cBus {
+    WriteByte(int addr, int value) -> bool
+    ReadByte(int addr) -> int
+    WriteReg(int addr, int reg, int value) -> bool
+    ReadReg(int addr, int reg) -> int
+    WriteBytes(int addr, List<int> bytes) -> bool
+    ReadBytes(int addr, int count) -> List<int>
+}
+
+// An SPI master device (one chip-select). Full-duplex: Transfer
+// clocks out `tx` and returns the bytes clocked in (same length).
+public interface SpiBus {
+    Transfer(List<int> tx) -> List<int>
+}
+
+// Timing — delays and a monotonic counter. Drivers that must pace
+// themselves (steppers, soft-PWM, debouncing) or measure pulse widths
+// (HC-SR04) take a Clock so they stay backend-neutral: the Linux
+// backend uses nanosleep/clock_gettime, an MCU backend its own timer.
+public interface Clock {
+    DelayMs(int ms) -> void
+    DelayUs(int us) -> void
+    Millis() -> int
+    Micros() -> int
+}
