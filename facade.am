@@ -69,6 +69,16 @@ public interface SpiBus {
     Transfer(List<int> tx) -> List<int>
 }
 
+// A serial / UART port — text and binary I/O. GPS receivers, modems,
+// other MCUs, RFID readers… A backend's UART implements this; drivers
+// (e.g. an NMEA GPS parser) take a SerialPort and stay portable.
+public interface SerialPort {
+    WriteString(string s) -> bool
+    ReadString(int max) -> string
+    WriteBytes(List<int> data) -> bool
+    ReadBytes(int max) -> List<int>
+}
+
 // Timing — delays and a monotonic counter. Drivers that must pace
 // themselves (steppers, soft-PWM, debouncing) or measure pulse widths
 // (HC-SR04) take a Clock so they stay backend-neutral: the Linux
